@@ -65,7 +65,7 @@ class TodoList extends Component {
   getTodoItem() {
     return this.state.list.map((item, index) => {
       return (
-        <div key={this.props.item}>
+        <div key={item}>
           {/* // 传递参数：bind多传递一个index下标值 
         // 【？？？】什么时候{},{{}}
         // 需要往TodoItem里面传入item和index的值 */}
