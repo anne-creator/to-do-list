@@ -44,13 +44,25 @@ class TodoList extends Component {
           // 用bind因为bind不会立即执行函数，而call和apply会在没有点击的时候就执行这个函数。
           // 为什么这个正是绑定是undefined呢？
           onChange={this.handleInputChange}
+          ref={(input) => {
+            this.input = input;
+          }}
         ></input>
-        <button onClick={this.handleBtnClick}>Submit</button>
-        <ul>{this.getTodoItem()}</ul>
+        <button onClick={this.handleBtnClick} type='primary'>
+          Submit
+        </button>
+        {/* FIXME this.ul 中的this指的是这个class？ */}
+        <ul
+          ref={(ul) => {
+            this.ul = ul;
+          }}
+        >
+          {this.getTodoItem()}
+        </ul>
       </Fragment>
     );
   }
-  handleInputChange(e) {
+  handleInputChange() {
     // 【1.e.target指向
     // e.target is input dom 元素
     // 【2.函数的this指向
@@ -59,8 +71,12 @@ class TodoList extends Component {
     // React 为严格模式，那么没有显式的使用调用者的情况下，this 不会自动绑定到全局对象上。handleClick 函数实际上会作为回调函数，传入 addEventListener() ，此时并没有被显示调用。这就是为什么你在 React 的组件中添加事件处理函数为什么会得到 undefined 而不是全局对象或者别的什么东西。
     // 需要再绑定此方法时候用bind()改变this的指向为原class
     // this.state.inputValue = e.target.value;
+
     // 【3.setState()方法改变state数据
-    this.setState({ inputValue: e.target.value });
+    // this.setState({ inputValue: this.input.value });
+    // 箭头函数优化方法：
+    const value = this.input.value;
+    this.setState(() => ({ inputValue: value }));
   }
   getTodoItem() {
     return this.state.list.map((item, index) => {
@@ -74,6 +90,7 @@ class TodoList extends Component {
             index={index}
             // 传递给子组件的方法的this必须指向父组件
             deleteItem={this.handleItemDelete}
+            // ref引用接受了一个参数。 this.input指向了接受的参数， 就是当前input框的dom节点
           />
         </div>
       );
@@ -82,11 +99,15 @@ class TodoList extends Component {
   handleBtnClick() {
     // [3]ES6箭头函数可以用（） 来代替返回值
     // preSate：修改之前的数据，等价于this.state，更靠谱，避免不小心改变state的状态
-    this.setState((prevState) => ({
-      list: [...prevState.list, prevState.inputValue],
-      inputValue: '',
-    }));
-
+    this.setState(
+      (prevState) => ({
+        list: [...prevState.list, prevState.inputValue],
+        inputValue: '',
+      }),
+      () => {
+        console.log(this.ul.querySelectorAll('li').length);
+      }
+    );
     // [2]新版setState：接受一个函数而不光是对象。函数有一个返回值，return 待修改的对象
     // this.setState(() => {
     //   return {
